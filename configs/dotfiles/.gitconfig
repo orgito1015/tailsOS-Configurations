@@ -53,8 +53,10 @@
     aliases = config --get-regexp alias
 
 [http]
-    # Route git over Tor (SOCKS5 proxy that Tails provides)
-    # Uncomment the line below to force all HTTP(S) git traffic through Tor.
+    # In Tails, all traffic is already forced through Tor via iptables — this
+    # proxy setting is redundant.  Uncomment only if you need Git to use the
+    # SOCKS5 proxy explicitly (e.g., in a non-Tails environment or for an
+    # application that bypasses the system-level routing).
     # proxy = socks5h://127.0.0.1:9050
 
 [credential]

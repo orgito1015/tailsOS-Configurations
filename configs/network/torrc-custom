@@ -24,6 +24,8 @@
 # WARNING: Restricting nodes can reduce anonymity.  Use carefully.
 # EntryNodes {de},{nl},{ch},{at}
 # ExitNodes {de},{nl},{ch},{at}
+# WARNING: Do NOT uncomment StrictNodes 1 without also setting EntryNodes and/or
+# ExitNodes above.  Enabling StrictNodes without a node list will break Tor entirely.
 # StrictNodes 1
 
 # ── Exclude nodes ─────────────────────────────────────────────────────────────
