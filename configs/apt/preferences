@@ -1,0 +1,71 @@
+# configs/apt/preferences
+# =============================================================================
+# APT pinning — pin packages to Debian Bookworm (stable)
+# =============================================================================
+# PURPOSE : Prevent apt from accidentally installing packages from Debian
+#           Testing (Trixie) or Unstable (Sid) even if those repositories
+#           are listed in sources.list.  Tails is based on Debian Bookworm;
+#           installing packages from newer suites can introduce untested
+#           software or break system libraries.
+#
+# USAGE:
+#   sudo cp configs/apt/preferences /etc/apt/preferences.d/99-tails-pinning
+#   sudo apt-get update
+#
+# REFERENCES:
+#   https://wiki.debian.org/AptPreferences
+#   https://tails.boum.org/contribute/design/
+# =============================================================================
+
+# ── Bookworm (stable) — highest priority ─────────────────────────────────────
+# Packages from Bookworm are preferred above all other sources.
+Package: *
+Pin: release n=bookworm
+Pin-Priority: 900
+
+# Also match the 'stable' alias
+Package: *
+Pin: release a=stable
+Pin-Priority: 900
+
+# ── Bookworm security updates — also high priority ───────────────────────────
+Package: *
+Pin: release n=bookworm-security
+Pin-Priority: 900
+
+Package: *
+Pin: release n=bookworm-updates
+Pin-Priority: 900
+
+# ── Tails-specific repository — allowed at default priority ──────────────────
+# Tails ships its own signed repository.  Keep it at the default priority
+# so its packages can override Debian where needed.
+Package: *
+Pin: origin deb.tails.boum.org
+Pin-Priority: 500
+
+# ── Testing (Trixie) — very low priority ─────────────────────────────────────
+# Packages from Testing will NOT be installed automatically.
+# To install a specific package from Testing:
+#   sudo apt-get install -t trixie <package>
+Package: *
+Pin: release a=testing
+Pin-Priority: 1
+
+Package: *
+Pin: release n=trixie
+Pin-Priority: 1
+
+# ── Unstable (Sid) — very low priority ───────────────────────────────────────
+Package: *
+Pin: release a=unstable
+Pin-Priority: 1
+
+Package: *
+Pin: release n=sid
+Pin-Priority: 1
+
+# ── Experimental — blocked ────────────────────────────────────────────────────
+Package: *
+Pin: release a=experimental
+Pin-Priority: -1

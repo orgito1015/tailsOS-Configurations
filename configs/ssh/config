@@ -1,0 +1,96 @@
+# configs/ssh/config
+# =============================================================================
+# Hardened SSH client configuration for Tails OS
+# =============================================================================
+# USAGE:
+#   Session-only:  mkdir -p ~/.ssh && cp configs/ssh/config ~/.ssh/config
+#                  chmod 600 ~/.ssh/config
+#
+#   Persistent:    Tails can persist ~/.ssh/ automatically.
+#                  Enable "SSH Client" in Persistent Storage:
+#                    Applications → Tails → Configure Persistent Volume → SSH Client
+#                  Then place this file at:
+#                    /live/persistence/TailsData_unlocked/openssh-client/config
+#
+# ROUTING:  All SSH connections are proxied through Tor using torsocks
+#           (the ProxyCommand below).  This routes all TCP traffic for the
+#           SSH connection through the Tor SOCKS5 proxy on 127.0.0.1:9050.
+#
+# ALGORITHMS: Restricted to modern algorithms recommended by:
+#             • Mozilla Infosec SSH guidelines
+#             • OpenSSH 8.x defaults for Debian Bookworm
+# =============================================================================
+
+# ── Global defaults ───────────────────────────────────────────────────────────
+Host *
+    # ── Tor routing ──────────────────────────────────────────────────────────
+    # Route all SSH connections through Tor.
+    # Requires: torsocks (installed by default in Tails)
+    ProxyCommand torsocks nc %h %p
+
+    # ── Authentication ────────────────────────────────────────────────────────
+    # Prefer public-key authentication; never fall back to password auth.
+    PreferredAuthentications publickey
+    PasswordAuthentication no
+    ChallengeResponseAuthentication no
+    KbdInteractiveAuthentication no
+    # Disable GSSAPI (Kerberos) — not needed in a Tails session.
+    GSSAPIAuthentication no
+
+    # ── Key exchange algorithms ───────────────────────────────────────────────
+    # Modern key exchange only.  Removes legacy DH groups (group14/group1)
+    # while keeping the strong curve25519 and large-prime DH groups.
+    KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
+
+    # ── Host key algorithms ───────────────────────────────────────────────────
+    # Prefer Ed25519, then RSA with SHA-2.  Refuse legacy DSA and ECDSA-NIST.
+    HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+
+    # ── Symmetric ciphers ─────────────────────────────────────────────────────
+    # ChaCha20-Poly1305 is preferred (resists timing attacks).
+    # AES-GCM provides strong AEAD encryption as a fallback.
+    Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+
+    # ── MACs ──────────────────────────────────────────────────────────────────
+    # Encrypt-then-MAC (ETM) variants only; these are immune to Lucky13.
+    MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
+
+    # ── Hardening options ─────────────────────────────────────────────────────
+    # Disable agent forwarding — if the remote host is compromised, your local
+    # agent could be hijacked.
+    ForwardAgent no
+
+    # Disable X11 forwarding (potential side-channel).
+    ForwardX11 no
+    ForwardX11Trusted no
+
+    # Disable SSH tunneling / port forwarding unless explicitly needed.
+    Tunnel no
+    PermitLocalCommand no
+
+    # Verify host keys strictly.  NEVER use StrictHostKeyChecking=no.
+    StrictHostKeyChecking ask
+    # Store known hosts in a hashed form to prevent a leaked file from
+    # revealing which hosts you have connected to.
+    HashKnownHosts yes
+
+    # Close the connection if the server does not respond within 2 × 30s.
+    ServerAliveInterval 30
+    ServerAliveCountMax 2
+    ConnectTimeout 30
+
+    # Refuse to use .rhosts / RSA host-based authentication.
+    HostbasedAuthentication no
+
+    # Reduce information sent to the server.
+    SendEnv LANG LC_*
+
+# ── Example host entry ────────────────────────────────────────────────────────
+# Uncomment and edit to add a specific host.  The hostname can be an onion
+# address if the server runs an SSH hidden service.
+#
+# Host myserver
+#     HostName example.onion       # or a regular hostname / IP
+#     User myuser
+#     IdentityFile ~/.ssh/id_ed25519
+#     Port 22
