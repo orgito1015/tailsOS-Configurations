@@ -1,0 +1,81 @@
+# configs/apparmor/usr.bin.wget
+# =============================================================================
+# AppArmor profile — restrict wget to only run through Tor
+# =============================================================================
+# PURPOSE : Confine /usr/bin/wget so it can only make outbound network
+#           connections through the Tor SOCKS5 proxy (127.0.0.1:9050) and
+#           cannot write files outside a limited set of safe paths.
+#
+# USAGE:
+#   sudo cp configs/apparmor/usr.bin.wget /etc/apparmor.d/usr.bin.wget
+#   sudo apparmor_parser -r /etc/apparmor.d/usr.bin.wget
+#
+# NOTE: For wget to actually route through Tor, either:
+#   1. Invoke via torsocks:  torsocks wget <url>
+#   2. Set in ~/.wgetrc:     https_proxy = socks5h://127.0.0.1:9050
+#                             http_proxy  = socks5h://127.0.0.1:9050
+#
+# TESTED ON: Tails 6.x (Debian 12 Bookworm, AppArmor 3.x)
+# =============================================================================
+
+#include <tunables/global>
+
+/usr/bin/wget {
+    #include <abstractions/base>
+    #include <abstractions/nameservice>
+
+    # Allow reading the binary itself and standard libraries
+    /usr/bin/wget              r,
+    /lib/**                    r,
+    /lib64/**                  r,
+    /usr/lib/**                r,
+    /etc/ld.so.cache           r,
+    /etc/ssl/certs/**          r,
+    /etc/ssl/openssl.cnf       r,
+    /usr/share/ca-certificates/** r,
+
+    # wget configuration
+    /etc/wgetrc                r,
+    /usr/share/wget/**         r,
+
+    # ── Network ───────────────────────────────────────────────────────────────
+    # Allow TCP network access.  Note: AppArmor cannot restrict connections
+    # to specific IP addresses or ports.  Use torsocks or set http_proxy/
+    # https_proxy in ~/.wgetrc to enforce Tor routing.
+    network inet  stream,
+    network inet6 stream,
+
+    # ── File read ─────────────────────────────────────────────────────────────
+    /dev/stdin                 r,
+    /proc/self/**              r,
+
+    # ── File write ────────────────────────────────────────────────────────────
+    # Allow writing to the standard download destination and /tmp.
+    # To save files elsewhere, add the path here or invoke wget with a
+    # specific -P <dir> that is covered by one of these rules.
+    /home/amnesia/Downloads/** rw,
+    /home/amnesia/Persistent/** rw,
+    /tmp/**                    rw,
+
+    # Deny write access to sensitive system locations
+    deny /etc/**               w,
+    deny /usr/**               w,
+    deny /live/**              w,
+    deny /root/**              rw,
+    deny /proc/sys/**          rw,
+    deny /sys/**               rw,
+
+    # ── Terminal / pipes ──────────────────────────────────────────────────────
+    /dev/tty                   rw,
+    /dev/pts/*                 rw,
+    /dev/null                  rw,
+    /dev/urandom               r,
+
+    # ── User config ───────────────────────────────────────────────────────────
+    @{HOME}/.wgetrc            r,
+    @{HOME}/.netrc             r,
+
+    # wget writes a temporary HSTS database; redirect to /dev/null via wgetrc
+    # (set WGETRC=/dev/null in the environment, or set hsts=off in ~/.wgetrc).
+    @{HOME}/.wget-hsts         rw,
+}

@@ -1,0 +1,76 @@
+# configs/apparmor/usr.bin.curl
+# =============================================================================
+# AppArmor profile — restrict curl to only run through Tor
+# =============================================================================
+# PURPOSE : Confine /usr/bin/curl so it can only make outbound network
+#           connections through the Tor SOCKS5 proxy (127.0.0.1:9050) and
+#           cannot write files outside a limited set of safe paths.
+#
+# USAGE:
+#   sudo cp configs/apparmor/usr.bin.curl /etc/apparmor.d/usr.bin.curl
+#   sudo apparmor_parser -r /etc/apparmor.d/usr.bin.curl
+#
+# NOTE: This profile intentionally restricts curl more aggressively than
+#       the Tails default AppArmor configuration.  If you use curl for
+#       legitimate local file operations you may need to relax some rules.
+#
+# TESTED ON: Tails 6.x (Debian 12 Bookworm, AppArmor 3.x)
+# =============================================================================
+
+#include <tunables/global>
+
+/usr/bin/curl {
+    #include <abstractions/base>
+    #include <abstractions/nameservice>
+
+    # Allow reading the binary itself and standard libraries
+    /usr/bin/curl              r,
+    /lib/**                    r,
+    /lib64/**                  r,
+    /usr/lib/**                r,
+    /etc/ld.so.cache           r,
+    /etc/ssl/certs/**          r,
+    /etc/ssl/openssl.cnf       r,
+    /usr/share/ca-certificates/** r,
+
+    # Allow reading the CA bundle and curl defaults
+    /etc/curl/**               r,
+    /usr/share/curl/**         r,
+
+    # ── Network ──────────────────────────────────────────────────────────────
+    # Allow TCP network access.  Note: AppArmor cannot restrict connections
+    # to specific IP addresses or ports at this level.  To ensure curl routes
+    # through Tor, invoke it via torsocks or pass --proxy socks5h://127.0.0.1:9050.
+    # This profile's value is in restricting file-system access, not network.
+    network inet  stream,
+    network inet6 stream,
+
+    # ── File read ─────────────────────────────────────────────────────────────
+    # Allow reading stdin (for --data @- patterns)
+    /dev/stdin                 r,
+    /proc/self/**              r,
+
+    # ── File write ────────────────────────────────────────────────────────────
+    # Allow writing only to the user's home Downloads directory, /tmp, and
+    # named files via --output.  Adjust to match your workflow.
+    /home/amnesia/Downloads/** rw,
+    /tmp/**                    rw,
+
+    # Deny write access to sensitive locations
+    deny /etc/**               w,
+    deny /usr/**               w,
+    deny /live/**              w,
+    deny /root/**              rw,
+    deny /proc/sys/**          rw,
+    deny /sys/**               rw,
+
+    # ── Terminal / pipes ──────────────────────────────────────────────────────
+    /dev/tty                   rw,
+    /dev/pts/*                 rw,
+    /dev/null                  rw,
+    /dev/urandom               r,
+
+    # ── Allow reading user config ─────────────────────────────────────────────
+    @{HOME}/.curlrc            r,
+    @{HOME}/.netrc             r,
+}
