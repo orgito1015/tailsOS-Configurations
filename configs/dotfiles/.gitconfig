@@ -1,0 +1,66 @@
+# ~/.gitconfig — Git configuration for Tails OS sessions
+# Managed by tailsOS-Configurations.
+#
+# IMPORTANT: No credentials or signing keys are stored here.
+# The user identity below uses privacy-preserving placeholder values.
+# Edit [user] section for your own identity if committing work.
+#
+# NOTE: When working in Tails, Git operations should be tunnelled through
+# Tor automatically (torsocks git ...) or by setting the proxy below.
+
+[user]
+    # Replace with your real name/email only if you intend to sign commits.
+    # Leave as-is for anonymous sessions.
+    name  = Tails User
+    email = user@localhost
+
+[core]
+    editor     = vim
+    autocrlf   = input          # Convert CRLF → LF on commit
+    whitespace = trailing-space,space-before-tab
+    pager      = less -FRSX
+
+[init]
+    defaultBranch = main
+
+[color]
+    ui     = auto
+    branch = auto
+    diff   = auto
+    status = auto
+
+[pull]
+    rebase = false              # Merge on pull (explicit choice)
+
+[push]
+    default = simple            # Push current branch to its upstream
+
+[diff]
+    tool     = vimdiff
+    colorMoved = default
+
+[merge]
+    tool = vimdiff
+    conflictstyle = diff3
+
+[alias]
+    st      = status -s
+    lg      = log --oneline --graph --decorate --all
+    last    = log -1 HEAD --stat
+    undo    = reset --soft HEAD~1
+    uncommit = reset --soft HEAD~1
+    unstage = reset HEAD --
+    aliases = config --get-regexp alias
+
+[http]
+    # Route git over Tor (SOCKS5 proxy that Tails provides)
+    # Uncomment the line below to force all HTTP(S) git traffic through Tor.
+    # proxy = socks5h://127.0.0.1:9050
+
+[credential]
+    # Do NOT store credentials on disk in a Tails session.
+    helper =
+
+[advice]
+    detachedHead    = false
+    addIgnoredFile  = false

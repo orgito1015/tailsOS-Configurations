@@ -1,0 +1,52 @@
+# configs/network/torrc-custom
+# =============================================================================
+# Custom Tor configuration snippet for Tails OS
+# =============================================================================
+# USAGE: Tails manages its own torrc at /etc/tor/torrc.
+#        Place additional configuration in /etc/tor/torrc.d/ or
+#        append to /etc/tor/torrc (requires sudo and session access).
+#
+#        Example:
+#          sudo tee -a /etc/tor/torrc < configs/network/torrc-custom
+#          sudo systemctl reload tor@default
+#
+# NOTE: Tails' Tor configuration is already well-hardened.  Only make
+#       changes here if you have a specific and understood reason to do so.
+#       Incorrect Tor configuration can degrade anonymity.
+# =============================================================================
+
+# ── Circuit settings ──────────────────────────────────────────────────────────
+# Build more circuits to reduce latency (tradeoff: slightly more Tor data)
+# NumEntryGuards 4
+
+# ── Entry / Exit node preferences ────────────────────────────────────────────
+# Restrict entry guards to specific countries (2-letter ISO codes).
+# WARNING: Restricting nodes can reduce anonymity.  Use carefully.
+# EntryNodes {de},{nl},{ch},{at}
+# ExitNodes {de},{nl},{ch},{at}
+# StrictNodes 1
+
+# ── Exclude nodes ─────────────────────────────────────────────────────────────
+# Exclude nodes in specific countries from all circuit positions.
+# ExcludeNodes {cn},{ru},{ir},{kp}
+# ExcludeExitNodes {cn},{ru},{ir},{kp}
+
+# ── Hidden service / onion service ───────────────────────────────────────────
+# Uncomment to run a local hidden service on port 8080:
+# HiddenServiceDir /var/lib/tor/hidden_service/
+# HiddenServicePort 80 127.0.0.1:8080
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+# Tails default: notice level to syslog.
+# For debugging only (generates a lot of output):
+# Log debug syslog
+
+# ── DNS ───────────────────────────────────────────────────────────────────────
+# Tails already resolves all DNS through Tor.  These settings are defaults:
+# DNSPort 5300
+# AutomapHostsOnResolve 1
+# AutomapHostsSuffixes .exit,.onion
+
+# ── SOCKS port ────────────────────────────────────────────────────────────────
+# Tails default: 9050 (and 9150 for Tor Browser).
+# Applications should use torsocks or configure SOCKS5 127.0.0.1:9050.
