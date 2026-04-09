@@ -61,7 +61,7 @@ PACKAGES=(
     "htop"            # interactive process viewer
     "tree"            # directory tree display
     "jq"              # JSON processor
-    "xxd"             # hex dump utility
+    "xxd"             # hex dump utility (ships in vim-common; already present if vim is installed)
     "curl"            # HTTP client (usually already installed)
     "wget"            # file downloader
 )

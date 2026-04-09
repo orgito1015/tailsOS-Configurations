@@ -76,7 +76,13 @@ These scripts extend those defaults; they do not replace them.
 
 ### `05-persistent-setup.sh`
 
-- XDG autostart entries run as the `amnesia` user and use `sudo` without a password (relies on the admin password being set and `sudo` having been used at least once in the session, or you may be prompted).
+- **XDG autostart and `sudo` cache**: The autostart `.desktop` entries execute hardening scripts via `sudo`.  If the `sudo` credential cache has expired by the time GNOME launches the autostart entries (typically after a fresh login), the `sudo` call will silently fail because it has no TTY to prompt for a password, and the `|| true` guard prevents any visible error.
+  - **Preferred alternative**: create a `/etc/sudoers.d/tails-hardening` drop-in that grants passwordless `sudo` for the specific hardening scripts only, or replace `sudo` in the `Exec=` line with `pkexec` to get a graphical authentication prompt.  Example sudoers drop-in:
+    ```
+    amnesia ALL=(root) NOPASSWD: /home/amnesia/.config/tails-hardening/iptables-rules.sh, \
+                                  /usr/sbin/sysctl -p /home/amnesia/.config/tails-hardening/sysctl-hardening.conf
+    ```
+  - Until a sudoers drop-in is in place, verify that hardening was applied after each login by inspecting `sudo iptables -L` and `sysctl kernel.yama.ptrace_scope`.
 - The scripts placed in `~/.config/tails-hardening/` run with `sudo` at each login.  Review them if you are concerned about what runs automatically.
 
 ---

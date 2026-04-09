@@ -89,6 +89,7 @@ fi
 # preserve Tor and Wi-Fi module loading.  Setting it to 1 provides the most
 # locked-down configuration but prevents loading any new kernel modules.
 # Uncomment the line below only after all required modules are loaded:
+# sysctl -w kernel.modules_disabled=1
 
 # ── 9. Disable SysRq key (prevents magic-key attacks) ────────────────────────
 info "Restricting SysRq key..."
