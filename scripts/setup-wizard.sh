@@ -102,6 +102,18 @@ if ask_yn "Install extra packages? (04-package-install.sh)"; then
 fi
 echo ""
 
+echo -e "${CYAN}── Step 5b: Install cybersecurity tools ────────────${NC}"
+echo "  Installs offensive and defensive tools grouped by discipline:"
+echo "  network analysis, web testing, password auditing, forensics,"
+echo "  wireless security, reverse engineering, and OSINT."
+echo -e "  ${YELLOW}Requires an active Tor connection.  Installation can take 10-20 minutes.${NC}"
+echo -e "  ${YELLOW}Use --category <name> to install only one discipline.${NC}"
+RUN_08=false
+if ask_yn "Install cybersecurity tools? (08-cybersecurity-tools.sh)"; then
+    RUN_08=true
+fi
+echo ""
+
 echo -e "${CYAN}── Step 6: Persistent Storage setup ─────────────────${NC}"
 echo "  Saves dotfiles and hardening settings so they reload on next boot."
 echo -e "  ${YELLOW}Requires Persistent Storage to be enabled and unlocked.${NC}"
@@ -129,6 +141,7 @@ ${RUN_01} && SELECTED+=("01-network-hardening.sh")
 ${RUN_02} && SELECTED+=("02-security-hardening.sh")
 ${RUN_03} && SELECTED+=("03-dotfiles-setup.sh")
 ${RUN_04} && SELECTED+=("04-package-install.sh")
+${RUN_08} && SELECTED+=("08-cybersecurity-tools.sh")
 ${RUN_05} && SELECTED+=("05-persistent-setup.sh")
 ${RUN_06} && SELECTED+=("06-verify.sh")
 
@@ -182,6 +195,7 @@ ${RUN_01} && run_script "01-network-hardening.sh"
 ${RUN_02} && run_script "02-security-hardening.sh"
 ${RUN_03} && run_script "03-dotfiles-setup.sh"
 ${RUN_04} && run_script "04-package-install.sh"
+${RUN_08} && run_script "08-cybersecurity-tools.sh"
 ${RUN_05} && run_script "05-persistent-setup.sh"
 ${RUN_06} && run_script "06-verify.sh"
 

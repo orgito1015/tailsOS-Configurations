@@ -19,11 +19,11 @@
 SHELL := /bin/bash
 SCRIPTS_DIR := scripts
 
-.PHONY: all check harden network security dotfiles packages persist verify \
-        cleanup wizard usb-whitelist help
+.PHONY: all check harden network security dotfiles packages cybersec persist \
+        verify cleanup wizard usb-whitelist help
 
 # Default target
-all: check network security dotfiles packages
+all: check network security dotfiles packages cybersec
 
 # ── Pre-flight check ──────────────────────────────────────────────────────────
 check:
@@ -49,6 +49,10 @@ dotfiles:
 # ── Package installation ──────────────────────────────────────────────────────
 packages:
 	@bash $(SCRIPTS_DIR)/04-package-install.sh
+
+# ── Cybersecurity tools ───────────────────────────────────────────────────────
+cybersec:
+	@bash $(SCRIPTS_DIR)/08-cybersecurity-tools.sh
 
 # ── Persistent Storage setup ─────────────────────────────────────────────────
 persist:
@@ -85,6 +89,7 @@ help:
 	@echo "  make security       Kernel/system hardening only (02)"
 	@echo "  make dotfiles       Install dotfiles into ~/"
 	@echo "  make packages       Install packages via apt over Tor"
+	@echo "  make cybersec       Install cybersecurity tools via apt over Tor"
 	@echo "  make persist        Wire settings into Persistent Storage"
 	@echo "  make verify         Post-setup hardening audit (read-only)"
 	@echo "  make cleanup        Clean session artifacts before shutdown"
