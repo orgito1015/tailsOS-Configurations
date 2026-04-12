@@ -39,6 +39,7 @@ SCRIPTS=(
     "02-security-hardening.sh"
     "03-dotfiles-setup.sh"
     "04-package-install.sh"
+    "08-cybersecurity-tools.sh"
 )
 
 echo ""
