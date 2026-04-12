@@ -141,6 +141,7 @@ ${RUN_01} && SELECTED+=("01-network-hardening.sh")
 ${RUN_02} && SELECTED+=("02-security-hardening.sh")
 ${RUN_03} && SELECTED+=("03-dotfiles-setup.sh")
 ${RUN_04} && SELECTED+=("04-package-install.sh")
+# 08 runs before 05 so all packages are installed before being persisted
 ${RUN_08} && SELECTED+=("08-cybersecurity-tools.sh")
 ${RUN_05} && SELECTED+=("05-persistent-setup.sh")
 ${RUN_06} && SELECTED+=("06-verify.sh")
@@ -195,6 +196,7 @@ ${RUN_01} && run_script "01-network-hardening.sh"
 ${RUN_02} && run_script "02-security-hardening.sh"
 ${RUN_03} && run_script "03-dotfiles-setup.sh"
 ${RUN_04} && run_script "04-package-install.sh"
+# 08 runs before 05 so all packages are installed before being persisted
 ${RUN_08} && run_script "08-cybersecurity-tools.sh"
 ${RUN_05} && run_script "05-persistent-setup.sh"
 ${RUN_06} && run_script "06-verify.sh"

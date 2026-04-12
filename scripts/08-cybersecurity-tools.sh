@@ -122,8 +122,7 @@ PKGS_FORENSICS=(
     "binwalk"            # firmware analysis and extraction
     "sleuthkit"          # CLI tools for NTFS/FAT/ext forensic analysis
     "dc3dd"              # patched GNU dd for forensic imaging
-    "ddrescue"           # data recovery tool
-    "gddrescue"          # alias meta-package for ddrescue (may be same)
+    "ddrescue"           # data recovery tool (also known as gddrescue)
     "volatility3"        # memory forensics framework
     "bulk-extractor"     # stream-based forensic feature extractor
     "exifprobe"          # examine and display EXIF data in image files
@@ -158,8 +157,7 @@ PKGS_REVERSING=(
     "ghidra"             # NSA Software Reverse Engineering suite
     "ltrace"             # library call tracer
     "strace"             # system call tracer
-    "objdump"            # display info from object files (ships in binutils)
-    "binutils"           # collection of binary utilities
+    "binutils"           # collection of binary utilities (includes objdump)
     "nasm"               # x86/x64 assembler
     "patchelf"           # modify ELF binaries
     "upx-ucl"            # executable packer/unpacker
