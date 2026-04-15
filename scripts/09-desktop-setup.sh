@@ -46,31 +46,26 @@ die()   { echo -e "  ${RED}[ERROR]${NC} $*"; exit 1; }
 INSTALL_OPENBOX=false
 WALLPAPER_COLOR="#1e1e2e"
 
-for arg in "$@"; do
-    case "${arg}" in
+while [[ $# -gt 0 ]]; do
+    case "$1" in
         --openbox)
             INSTALL_OPENBOX=true
+            shift
             ;;
         --wallpaper-color)
-            # Next argument is the colour — handled below
-            ;;
-        \#*)
-            # Colour value following --wallpaper-color
-            WALLPAPER_COLOR="${arg}"
+            if [[ -z "${2:-}" ]]; then
+                warn "--wallpaper-color requires a hex colour value (e.g. #1a1a2e)"
+            else
+                WALLPAPER_COLOR="$2"
+                shift
+            fi
+            shift
             ;;
         *)
-            warn "Unknown argument: ${arg} (ignored)"
+            warn "Unknown argument: $1 (ignored)"
+            shift
             ;;
     esac
-done
-
-# Handle --wallpaper-color <value> as a pair
-PREV=""
-for arg in "$@"; do
-    if [[ "${PREV}" == "--wallpaper-color" ]]; then
-        WALLPAPER_COLOR="${arg}"
-    fi
-    PREV="${arg}"
 done
 
 # ── Sanity checks ─────────────────────────────────────────────────────────────
@@ -274,7 +269,7 @@ if [[ -n "${DEFAULT_PROFILE}" ]]; then
     TP_SCHEMA="org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:${DEFAULT_PROFILE}/"
     gs_set "${TP_SCHEMA}" "use-system-font"       "true"
     gs_set "${TP_SCHEMA}" "use-theme-colors"      "false"
-    gs_set "${TP_SCHEMA}" "background-color"      "'#1e1e2e'"
+    gs_set "${TP_SCHEMA}" "background-color"      "'${WALLPAPER_COLOR}'"
     gs_set "${TP_SCHEMA}" "foreground-color"      "'#cdd6f4'"
     gs_set "${TP_SCHEMA}" "bold-is-bright"        "true"
     gs_set "${TP_SCHEMA}" "scrollbar-policy"      "'never'"
@@ -288,20 +283,23 @@ if [[ "${INSTALL_OPENBOX}" == true ]]; then
     echo ""
     echo "Installing Openbox (minimal window manager)..."
 
-    if [[ "${EUID}" -ne 0 ]]; then
-        SUDO_CMD="sudo"
-    else
-        SUDO_CMD=""
-    fi
-
+    # Script already enforces EUID != 0, so sudo is always required here.
     # Check Tor
     if ! systemctl is-active --quiet tor@default 2>/dev/null && \
        ! systemctl is-active --quiet tor        2>/dev/null; then
         warn "Tor does not appear to be running. apt may fail."
     fi
 
-    if ${SUDO_CMD} apt-get install -y --no-install-recommends \
-            openbox obconf obmenu tint2 nitrogen feh 2>&1 | tail -5; then
+    # Packages:
+    #   openbox   — minimal stacking window manager
+    #   obconf    — GTK-based Openbox configuration tool
+    #   obmenu    — graphical menu editor for Openbox
+    #   tint2     — lightweight taskbar / system tray
+    #   nitrogen  — wallpaper browser and setter
+    #   feh       — lightweight image viewer / fallback wallpaper tool
+    OPENBOX_PKGS=(openbox obconf obmenu tint2 nitrogen feh)
+    if sudo apt-get install -y --no-install-recommends \
+            "${OPENBOX_PKGS[@]}" 2>&1 | tail -5; then
         ok "Openbox and companion tools installed."
         info "To use Openbox this session, run:  openbox --replace &"
         info "To make it your default WM, log out and choose 'Openbox' at the login screen."
